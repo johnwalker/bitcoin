@@ -3349,6 +3349,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 {
     RandAddSeedPerfmon();
     LogPrint("net", "received: %s (%"PRIszu" bytes)\n", strCommand, vRecv.size());
+    std::cout << "partner:" << pfrom->addr.ToString() << std::endl;
+
     if (mapArgs.count("-dropmessagestest") && GetRand(atoi(mapArgs["-dropmessagestest"])) == 0)
     {
         LogPrintf("dropmessagestest DROPPING RECV MESSAGE\n");
