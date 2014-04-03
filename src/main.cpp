@@ -22,6 +22,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 using namespace std;
 using namespace boost;
@@ -3345,12 +3346,19 @@ void static ProcessGetData(CNode* pfrom)
     }
 }
 
+std::ofstream *iplog = NULL;
 bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 {
     RandAddSeedPerfmon();
     LogPrint("net", "received: %s (%"PRIszu" bytes)\n", strCommand, vRecv.size());
-    std::cout << "partner:" << pfrom->addr.ToString() << std::endl;
 
+    if (iplog == NULL)
+      {
+	iplog = new std::ofstream();
+	iplog->open("iplog.csv", std::ofstream::out | std::ofstream::app);
+      }
+    (*iplog) << pfrom->addr.ToString() << ", " << GetTime() << endl;
+    
     if (mapArgs.count("-dropmessagestest") && GetRand(atoi(mapArgs["-dropmessagestest"])) == 0)
     {
         LogPrintf("dropmessagestest DROPPING RECV MESSAGE\n");
@@ -3779,6 +3787,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         vRecv >> block;
 
         LogPrint("net", "received block %s\n", block.GetHash().ToString());
+	std::cout << "{block: " << block.GetHash().ToString() << ", from: " << pfrom->addr.ToString() << "}";
         // block.print();
 
         CInv inv(MSG_BLOCK, block.GetHash());
